@@ -10,6 +10,7 @@ function CreateProductForm() {
 
   const navigate = useNavigate();
 
+  // สร้าง request ไปหา server
   const createProducts = async () => {
     await axios.post("http://localhost:4001/products", {
       name,

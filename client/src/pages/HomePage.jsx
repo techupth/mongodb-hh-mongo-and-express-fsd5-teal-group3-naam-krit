@@ -8,12 +8,16 @@ function HomePage() {
   const [products, setProducts] = useState([]);
   const [isError, setIsError] = useState(null);
   const [isLoading, setIsLoading] = useState(null);
+  const [limitItem, setLimitItem] = useState(3);
+  const [pageNum, setPageNum] = useState(0);
 
   const getProducts = async () => {
     try {
       setIsError(false);
       setIsLoading(true);
-      const results = await axios("http://localhost:4001/products");
+      const results = await axios(
+        `http://localhost:4001/products?limit=${limitItem}&page=${pageNum}`
+      );
       setProducts(results.data.data);
       setIsLoading(false);
     } catch (error) {
@@ -24,13 +28,15 @@ function HomePage() {
 
   const deleteProduct = async (productId) => {
     await axios.delete(`http://localhost:4001/products/${productId}`);
-    const newProducts = products.filter((product) => product.id !== productId);
+    const newProducts = products.filter((product) => product._id !== productId);
     setProducts(newProducts);
+
+    // วิธีที่ getProducts() แบบประหยัด กับแบบที่ต้องไปสร้างreqไปขออัพเดทจากserver
   };
 
   useEffect(() => {
     getProducts();
-  }, []);
+  }, [pageNum, limitItem]);
 
   return (
     <div>
@@ -124,8 +130,28 @@ function HomePage() {
       </div>
 
       <div className="pagination">
-        <button className="previous-button">Previous</button>
-        <button className="next-button">Next</button>
+        <button
+          className="previous-button"
+          onClick={() => {
+            setPageNum((prev) => {
+              prev -= 1;
+              if (prev < 1) {
+                return 0;
+              }
+              return prev;
+            });
+          }}
+        >
+          Previous
+        </button>
+        <button
+          className="next-button"
+          onClick={() => {
+            setPageNum(pageNum + 1);
+          }}
+        >
+          Next
+        </button>
       </div>
       <div className="pages">1/ total page</div>
     </div>
