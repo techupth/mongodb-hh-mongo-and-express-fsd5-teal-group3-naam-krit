@@ -10,6 +10,47 @@ const productRouter = Router();
 
 productRouter.get("/", async (req, res) => {
   const collection = db.collection("products");
+  const category = req.query.category;
+  const keywords = req.query.keyword;
+  const query = {};
+  const time = new Date();
+
+  if (category) {
+    query.category = new RegExp(category, "i"); // ไม่นับพิมพ์เล็กหรือพิมพ์ใหญ่
+  }
+  if (keywords) {
+    query.name = new RegExp(keywords, "i");
+  }
+
+  const products = await collection.find(query).sort({ time: -1 }).toArray();
+  return res.json({ data: products });
+});
+
+/*const displayTime = (createTime) => {
+  const date = new Date(createTime);
+  const months = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+  ];
+  
+  return `${date.getDate()} ${
+  months[date.getMonth()]
+  } ${date.getFullYear()} ${date.toLocaleTimeString()}`;
+  };
+*/
+
+/*productRouter.get("/", async (req, res) => {
+  const collection = db.collection("products");
   const page = req.query.page;
   const limit = req.query.limit;
   const products = await collection
@@ -21,17 +62,21 @@ productRouter.get("/", async (req, res) => {
   // const products = await collection.find({}).limit(10).toArray();
 
   return res.json({ data: products });
-});
+});*/
 
 productRouter.get("/:id", (req, res) => {});
 
 productRouter.post("/", async (req, res) => {
+  // Backend สร้างข้อมูลให้ส่ง time กลับไปด้วย
   const collection = db.collection("products");
   // 2. เพิ่มข้อมูลลง database โดยใช้คำสั่ง .insertOne
   try {
+    // 3. สร้างตัวแปรมารับค่าเวลา เพื่อเอามา sort
+    const time = new Date();
     const productData = { ...req.body };
-    const products = await collection.insertOne(productData);
-    // 3. return response กลับไปหา Client
+    const products = await collection.insertOne({ ...productData, time });
+
+    // 4. return response กลับไปหา Client
     return res.json({
       message: `Product has (${products.productId}) been created successfully`,
     });

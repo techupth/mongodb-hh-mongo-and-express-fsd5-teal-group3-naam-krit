@@ -8,6 +8,9 @@ function HomePage() {
   const [products, setProducts] = useState([]);
   const [isError, setIsError] = useState(null);
   const [isLoading, setIsLoading] = useState(null);
+  const [category, setCategory] = useState("");
+  const [keywords, setKeywords] = useState("");
+
   const [limitItem, setLimitItem] = useState(3);
   const [pageNum, setPageNum] = useState(0);
 
@@ -16,7 +19,7 @@ function HomePage() {
       setIsError(false);
       setIsLoading(true);
       const results = await axios(
-        `http://localhost:4001/products?limit=${limitItem}&page=${pageNum}`
+        `http://localhost:4001/products?category=${category}&keyword=${keywords}&limit=${limitItem}&page=${pageNum}`
       );
       setProducts(results.data.data);
       setIsLoading(false);
@@ -36,7 +39,7 @@ function HomePage() {
 
   useEffect(() => {
     getProducts();
-  }, [pageNum, limitItem]);
+  }, [pageNum, limitItem, category, keywords]);
 
   return (
     <div>
@@ -54,16 +57,31 @@ function HomePage() {
         <div className="search-box">
           <label>
             Search product
-            <input type="text" placeholder="Search by name" />
+            <input
+              type="text"
+              placeholder="Search by name"
+              onChange={(e) => {
+                setKeywords(e.target.value);
+              }}
+              value={keywords}
+            />
           </label>
         </div>
         <div className="category-filter">
           <label>
             View Category
-            <select id="category" name="category" value="it">
+            <select
+              id="category"
+              name="category"
+              value={category}
+              onChange={(e) => {
+                setCategory(e.target.value);
+              }}
+            >
               <option disabled value="">
                 -- Select a category --
               </option>
+              <option value="">All</option>
               <option value="it">IT</option>
               <option value="fashion">Fashion</option>
               <option value="food">Food</option>
@@ -91,8 +109,8 @@ function HomePage() {
               <div className="product-detail">
                 <h1>Product name: {product.name} </h1>
                 <h2>Product price: {product.price}</h2>
-                <h3>Category: IT</h3>
-                <h3>Created Time: 1 Jan 2011, 00:00:00</h3>
+                <h3>Category: {product.category}</h3>
+                <h3>Created Time: {product.time}</h3>
                 <p>Product description: {product.description} </p>
                 <div className="product-actions">
                   <button
